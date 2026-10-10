@@ -1,75 +1,211 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Tofaş 3D Mobil</title>
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>TOFAŞ CITY DRIVE 3D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;font-family:Arial;touch-action:none}canvas{display:block;width:100vw;height:100vh}
-#hud{position:fixed;top:10px;left:10px;color:white;background:#071018bb;padding:10px 13px;border-radius:12px;font-weight:bold;line-height:1.5;z-index:5}#hud b{color:#ffd34e}
-#right{position:fixed;top:10px;right:10px;color:white;background:#071018bb;padding:10px;border-radius:12px;text-align:right;z-index:5;font-weight:bold}
-#controls{position:fixed;inset:0;pointer-events:none;z-index:6}.b{position:absolute;pointer-events:auto;user-select:none;touch-action:none;background:#111c;color:white;border:2px solid #ffffff77;border-radius:17px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px #0008}.b:active{background:#ffc928;color:#111}
-#l{left:18px;bottom:26px;width:74px;height:74px;font-size:28px}#r{left:102px;bottom:26px;width:74px;height:74px;font-size:28px}#br{right:174px;bottom:26px;width:82px;height:74px}#ga{right:82px;bottom:26px;width:82px;height:74px}#gear{right:15px;bottom:116px;width:60px;height:60px;font-size:13px}#view{right:15px;bottom:26px;width:54px;height:54px;font-size:12px}#mode{right:15px;top:100px;width:54px;height:54px;font-size:12px}
-#start{position:fixed;z-index:20;top:50%;left:50%;transform:translate(-50%,-50%);border:0;border-radius:15px;padding:17px 25px;background:#ffca28;color:#111;font-size:19px;font-weight:900}
-#rotate{display:none;position:fixed;inset:0;z-index:30;background:#101820;color:white;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:bold}
-@media(orientation:portrait){#rotate{display:flex}}
-</style></head><body><canvas id="c"></canvas>
-<div id="hud">🚗 <b>TOFAŞ 3D</b><br>Hız: <span id="sp">0</span> km/h<br>Vites: <span id="gt">1</span></div><div id="right">💰 25.000 ₺<br>⛽ <span id="fuel">100</span>%<br><span id="day">GÜNDÜZ</span></div>
-<div id="controls"><div id="l" class="b">◀</div><div id="r" class="b">▶</div><div id="br" class="b">FREN</div><div id="ga" class="b">GAZ</div><div id="gear" class="b">VİTES</div><div id="view" class="b">KAMERA</div><div id="mode" class="b">GECE</div></div>
-<button id="start">OYUNU BAŞLAT</button><div id="rotate">📱<br>Telefonu yatay çevir</div>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial,sans-serif;touch-action:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+#ui{position:fixed;inset:0;pointer-events:none;color:#fff;text-shadow:0 2px 3px #000}
+#top{position:absolute;left:12px;top:10px;background:#0008;padding:8px 12px;border-radius:12px;font-weight:800}
+#top span{color:#ffd42a}
+#title{position:absolute;top:9px;left:50%;transform:translateX(-50%);font-size:25px;font-weight:900;font-style:italic;letter-spacing:1px}
+#buttons{position:absolute;right:10px;top:10px;display:flex;gap:7px;pointer-events:auto}
+.uib{border:1px solid #ffffff55;background:#101820bb;color:#fff;border-radius:12px;padding:9px 12px;font-weight:800}
+#left,#right,#gas,#brake,#clutch{position:absolute;bottom:22px;pointer-events:auto;border-radius:50%;border:2px solid #ffffff55;background:#101820aa;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;user-select:none}
+#left,#right{width:76px;height:76px;font-size:38px}.left{left:18px}.right{left:105px}
+#gas,#brake,#clutch{width:92px;height:92px;border-radius:22px;font-size:16px}.gas{right:18px}.brake{right:120px}.clutch{right:222px}
+#gearbox{position:absolute;right:16px;bottom:125px;width:108px;height:142px;background:#0008;border:1px solid #fff4;border-radius:14px;padding:9px;pointer-events:auto}
+.gear{display:inline-flex;width:31px;height:31px;margin:2px;border-radius:8px;align-items:center;justify-content:center;background:#222;color:#fff;font-weight:900;border:1px solid #fff3}.gear.active{background:#f5b400;color:#111}
+#portrait{display:none;position:fixed;z-index:50;inset:0;background:#111;color:#fff;align-items:center;justify-content:center;text-align:center;font-size:24px;font-weight:900;padding:30px}
+#start{position:fixed;z-index:60;left:50%;top:50%;transform:translate(-50%,-50%);padding:18px 28px;border:0;border-radius:18px;background:#f4b400;color:#111;font-size:20px;font-weight:900;box-shadow:0 8px 25px #0009}
+#hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:#0008;border-radius:10px;padding:6px 10px;font-size:12px}
+@media(orientation:portrait){#portrait{display:flex}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="ui">
+  <div id="top">HIZ <span id="speed">0</span> km/h<br>RPM <span id="rpm">900</span><br>VİTES <span id="gearNow">1</span></div>
+  <div id="title">TOFAŞ CITY DRIVE</div>
+  <div id="buttons">
+    <button class="uib" id="camera">KAMERA</button>
+    <button class="uib" id="lights">FAR</button>
+    <button class="uib" id="night">GECE</button>
+  </div>
+  <div id="left" class="left">◀</div><div id="right" class="right">▶</div>
+  <div id="gas" class="gas">GAZ</div><div id="brake" class="brake">FREN</div><div id="clutch" class="clutch">DEBRİYAJ</div>
+  <div id="gearbox">
+    <div class="gear active" data-g="1">1</div><div class="gear" data-g="2">2</div><div class="gear" data-g="3">3</div>
+    <div class="gear" data-g="4">4</div><div class="gear" data-g="5">5</div><div class="gear" data-g="R">R</div>
+  </div>
+  <div id="hint">KAMERA ile iç/dış/yan görünüm değişir</div>
+</div>
+<button id="start">3D OYUNU BAŞLAT</button>
+<div id="portrait">📱 Telefonu yatay çevir</div>
+
 <script>
-(()=>{const canvas=document.querySelector('#c'),gl=canvas.getContext('webgl',{antialias:true,alpha:false});if(!gl){document.getElementById('start').textContent='Bu tarayıcı WebGL desteklemiyor';return}
-const vs=`attribute vec3 p;attribute vec3 n;uniform mat4 mvp;uniform mat4 model;varying vec3 N;varying vec3 P;void main(){vec4 wp=model*vec4(p,1.);P=wp.xyz;N=mat3(model)*n;gl_Position=mvp*vec4(p,1.);}`;
-const fs=`precision mediump float;uniform vec3 col;uniform vec3 light;uniform float night;varying vec3 N;varying vec3 P;void main(){float d=max(dot(normalize(N),normalize(light)),0.);float a=.38+d*.72;vec3 c=col*a;if(night>.5)c*=vec3(.63,.72,.95);gl_FragColor=vec4(c,1.);}`;
-function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}let prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
-const loc={p:gl.getAttribLocation(prog,'p'),n:gl.getAttribLocation(prog,'n'),mvp:gl.getUniformLocation(prog,'mvp'),model:gl.getUniformLocation(prog,'model'),col:gl.getUniformLocation(prog,'col'),light:gl.getUniformLocation(prog,'light'),night:gl.getUniformLocation(prog,'night')};
-let verts=[],norms=[],indices=[]; // unit cube triangles with face normals
-const faces=[[[0,0,1],[[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]]],[[0,0,-1],[[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]]],[[1,0,0],[[.5,-.5,.5],[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5]]],[[-1,0,0],[[-.5,-.5,-.5],[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5]]],[[0,1,0],[[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[-.5,.5,-.5]]],[[0,-1,0],[[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5]]]];
-faces.forEach(f=>{let base=verts.length/3;f[1].forEach(v=>{verts.push(...v);norms.push(...f[0])});indices.push(base,base+1,base+2,base,base+2,base+3)});
-const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STATIC_DRAW);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);
-const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(norms),gl.STATIC_DRAW);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);
-const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(indices),gl.STATIC_DRAW);
-function matMul(a,b){let o=new Float32Array(16);for(let r=0;r<4;r++)for(let c=0;c<4;c++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
-function perspective(fov,asp,n,f){let t=1/Math.tan(fov/2),o=new Float32Array(16);o[0]=t/asp;o[5]=t;o[10]=(f+n)/(n-f);o[11]=-1;o[14]=2*f*n/(n-f);return o}
-function look(eye,tar){let z=norm(sub(eye,tar)),x=norm(cross([0,1,0],z)),y=cross(z,x);return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-dot(x,eye),-dot(y,eye),-dot(z,eye),1])}
-const sub=(a,b)=>a.map((v,i)=>v-b[i]),dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],norm=a=>{let l=Math.hypot(...a)||1;return a.map(v=>v/l)};
-function modelMat(pos,scale,rot=0){let c=Math.cos(rot),s=Math.sin(rot);return new Float32Array([c*scale[0],0,-s*scale[0],0,0,scale[1],0,0,s*scale[2],0,c*scale[2],0,pos[0],pos[1],pos[2],1])}
-function box(pos,scale,color,rot=0){let m=modelMat(pos,scale,rot),mvp=matMul(PV,m);gl.uniformMatrix4fv(loc.model,false,m);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.col,color);gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
-let night=false,view=0,speed=0,steer=0,gear=1,fuel=100,road=0,px=0,pz=0,gas=false,brake=false,left=false,right=false,started=false;
-function bind(id,set){let e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();set(true)});['pointerup','pointercancel','pointerleave'].forEach(k=>e.addEventListener(k,ev=>{ev.preventDefault();set(false)}))}
-bind('ga',v=>gas=v);bind('br',v=>brake=v);bind('l',v=>left=v);bind('r',v=>right=v);
-document.getElementById('gear').onclick=()=>{gear=gear%5+1;document.getElementById('gt').textContent=gear};
-document.getElementById('view').onclick=()=>view=(view+1)%3;
-document.getElementById('mode').onclick=()=>{night=!night;document.getElementById('day').textContent=night?'GECE':'GÜNDÜZ'};
-document.getElementById('start').onclick=async()=>{started=true;document.getElementById('start').style.display='none';try{await document.documentElement.requestFullscreen();await screen.orientation.lock('landscape')}catch(e){}};
-addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='w')gas=true;if(e.key==='ArrowDown'||e.key==='s')brake=true;if(e.key==='ArrowLeft'||e.key==='a')left=true;if(e.key==='ArrowRight'||e.key==='d')right=true});
-addEventListener('keyup',e=>{if(e.key==='ArrowUp'||e.key==='w')gas=false;if(e.key==='ArrowDown'||e.key==='s')brake=false;if(e.key==='ArrowLeft'||e.key==='a')left=false;if(e.key==='ArrowRight'||e.key==='d')right=false});
-let PV=new Float32Array(16);
-function render(t){requestAnimationFrame(render);let w=innerWidth,h=innerHeight;canvas.width=Math.floor(w*Math.min(devicePixelRatio,1.5));canvas.height=Math.floor(h*Math.min(devicePixelRatio,1.5));gl.viewport(0,0,canvas.width,canvas.height);gl.enable(gl.DEPTH_TEST);gl.clearColor(night?.025:.43,night?.045:.65,night?.09:.82,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-if(started){let dt=.016;speed=gas?Math.min(155,speed+35*dt):Math.max(0,speed-4*dt);if(brake)speed=Math.max(0,speed-75*dt);steer+=( ((right?1:0)-(left?1:0))*.65-steer)*.08;px+=steer*speed*dt*.012;pz+=speed*dt*.35;fuel=Math.max(0,fuel-speed*dt*.0007);document.getElementById('sp').textContent=Math.round(speed);document.getElementById('fuel').textContent=Math.round(fuel)}
-let eye=view===1?[px,2.1,pz+1.0]:view===2?[px-4,3.3,pz+7]:[px,4.6,pz+10.5],target=view===1?[px,1.3,pz-8]:[px,1,pz-7];let V=look(eye,target),Pr=perspective(1.05,w/h,.1,500);PV=matMul(Pr,V);gl.uniform3f(loc.light,-.5,1,.4);gl.uniform1f(loc.night,night?1:0);
-// ground
-box([0,-.3,pz-45],[120,.5,180],[night?.08:.18,night?.12:.34,night?.1:.16]);
-// road and shoulders
-box([0,-.02,pz-45],[12,.12,180],[.18,.19,.2]);box([-6.4,.0,pz-45],[.8,.14,180],[.68,.65,.58]);box([6.4,.0,pz-45],[.8,.14,180],[.68,.65,.58]);
-for(let z=-125;z<30;z+=7){box([0,.06,pz+z],[.16,.025,3.2],[.9,.88,.72])}
-// roadside city buildings and trees
-for(let i=0;i<30;i++){let z=pz-120+i*5.2;for(let side of [-1,1]){let x=side*(11+(i%4)*2.8);let hh=3+(i*7%13);box([x,hh/2,z],[3+(i%3),hh,3+(i%2)],[.38+(i%3)*.08,.38+(i%4)*.045,.36+(i%2)*.1]);for(let yy=1;yy<hh;yy+=1.5)for(let xx=-1;xx<=1;xx++)box([x+xx*.8,yy,z+1.56],[.35,.45,.06],night?[.9,.65,.22]:[.25,.48,.58]);box([side*9,.8,z+2],[.22,1.6,.22],[.32,.2,.1]);box([side*9,2,z+2],[1.8,2,1.8],[.12,.34,.16]);}}
-// traffic cars in the distance
-for(let i=0;i<7;i++){let z=pz-18-i*17;let x=(i%2?2.1:-2.1);car(x,z,i%3===0?[.82,.82,.76]:[.12,.2,.7],.8)}
-// player car
-car(px,pz-1,[.68,.035,.09],1);
-if(night){ // stylized headlight cones as pale road strips
- box([px-1.2,.12,pz-9],[.9,.04,8],[.55,.53,.3]);box([px+1.2,.12,pz-9],[.9,.04,8],[.55,.53,.3]);
+(()=> {
+"use strict";
+const canvas=document.getElementById("gl");
+const gl=canvas.getContext("webgl",{antialias:true,alpha:false,preserveDrawingBuffer:false});
+if(!gl){alert("Bu telefonda WebGL desteklenmiyor.");return;}
+
+const vs=`attribute vec3 p;attribute vec3 n;attribute vec3 c;uniform mat4 P,V,M;varying vec3 vc;varying vec3 vn;void main(){gl_Position=P*V*M*vec4(p,1.0);vc=c;vn=normalize(mat3(M)*n);}`;
+const fs=`precision mediump float;varying vec3 vc;varying vec3 vn;uniform vec3 light;uniform float night;void main(){float d=max(dot(normalize(vn),normalize(light)),0.0);float a=0.32+d*0.68;vec3 col=vc*a;col=mix(col,col*vec3(.25,.32,.55),night*.55);gl_FragColor=vec4(col,1.0);}`;
+function sh(t,s){let x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x}
+const prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+const A={p:gl.getAttribLocation(prog,"p"),n:gl.getAttribLocation(prog,"n"),c:gl.getAttribLocation(prog,"c")};
+const U={P:gl.getUniformLocation(prog,"P"),V:gl.getUniformLocation(prog,"V"),M:gl.getUniformLocation(prog,"M"),light:gl.getUniformLocation(prog,"light"),night:gl.getUniformLocation(prog,"night")};
+gl.enable(gl.DEPTH_TEST);gl.enable(gl.CULL_FACE);
+
+const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+function mul(a,b){let r=new Array(16);for(let c=0;c<4;c++)for(let r0=0;r0<4;r0++)r[c*4+r0]=a[r0]*b[c*4]+a[4+r0]*b[c*4+1]+a[8+r0]*b[c*4+2]+a[12+r0]*b[c*4+3];return r}
+function tr(x,y,z){let m=I();m[12]=x;m[13]=y;m[14]=z;return m}
+function sc(x,y,z){let m=I();m[0]=x;m[5]=y;m[10]=z;return m}
+function rx(a){let c=Math.cos(a),s=Math.sin(a),m=I();m[5]=c;m[6]=s;m[9]=-s;m[10]=c;return m}
+function ry(a){let c=Math.cos(a),s=Math.sin(a),m=I();m[0]=c;m[2]=-s;m[8]=s;m[10]=c;return m}
+function rz(a){let c=Math.cos(a),s=Math.sin(a),m=I();m[0]=c;m[1]=s;m[4]=-s;m[5]=c;return m}
+function compose(...ms){return ms.reduce(mul,I())}
+function persp(fov,asp,n,f){let t=1/Math.tan(fov/2),m=new Array(16).fill(0);m[0]=t/asp;m[5]=t;m[10]=(f+n)/(n-f);m[11]=-1;m[14]=2*f*n/(n-f);return m}
+function look(eye,tar){let zx=eye[0]-tar[0],zy=eye[1]-tar[1],zz=eye[2]-tar[2];let l=Math.hypot(zx,zy,zz);zx/=l;zy/=l;zz/=l;let xx=zy,xy=-zx,xz=0;l=Math.hypot(xx,xy);xx/=l;xy/=l;let yx=xy*zz,yy=zx*xz-xx*zz,yz=xx*zy-xy*zx;let m=I();m[0]=xx;m[1]=yx;m[2]=zx;m[4]=xy;m[5]=yy;m[6]=zy;m[8]=xz;m[9]=yz;m[10]=zz;m[12]=-(xx*eye[0]+xy*eye[1]+xz*eye[2]);m[13]=-(yx*eye[0]+yy*eye[1]+yz*eye[2]);m[14]=-(zx*eye[0]+zy*eye[1]+zz*eye[2]);return m}
+
+function cube(name,col){
+ const v=[-1,-1,-1,1,-1,-1,1,1,-1,-1,1,-1,-1,-1,1,1,-1,1,1,1,1,-1,1,1];
+ const idx=[0,1,2,2,3,0,4,7,6,6,5,4,0,4,5,5,1,0,3,2,6,6,7,3,1,5,6,6,2,1,4,0,3,3,7,4];
+ const ns=[[0,0,-1],[0,0,1],[-1,0,0],[1,0,0],[0,1,0],[0,-1,0]];
+ let P=[],N=[],C=[];
+ const faceN=[ns[0],ns[1],ns[2],ns[3],ns[4],ns[5]];
+ for(let f=0;f<6;f++){for(let j=0;j<6;j++){let id=idx[f*6+j];P.push(v[id*3],v[id*3+1],v[id*3+2]);N.push(...faceN[f]);C.push(...col)}}
+ return mesh(P,N,C);
 }
+function mesh(P,N,C){let o={count:P.length/3};o.pb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(P),gl.STATIC_DRAW);o.nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(N),gl.STATIC_DRAW);o.cb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(C),gl.STATIC_DRAW);return o}
+function draw(o,M){gl.bindBuffer(gl.ARRAY_BUFFER,o.pb);gl.vertexAttribPointer(A.p,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(A.p);gl.bindBuffer(gl.ARRAY_BUFFER,o.nb);gl.vertexAttribPointer(A.n,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(A.n);gl.bindBuffer(gl.ARRAY_BUFFER,o.cb);gl.vertexAttribPointer(A.c,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(A.c);gl.uniformMatrix4fv(U.M,false,M);gl.drawArrays(gl.TRIANGLES,0,o.count)}
+
+const meshes={
+ red:cube("red",[.72,.035,.055]),dark:cube("dark",[.025,.03,.035]),glass:cube("glass",[.05,.18,.25]),white:cube("white",[.88,.88,.84]),
+ road:cube("road",[.09,.10,.105]),side:cube("side",[.18,.35,.16]),building:cube("building",[.48,.48,.50]),window:cube("window",[.04,.10,.14]),
+ tree:cube("tree",[.06,.28,.08]),trunk:cube("trunk",[.25,.13,.05]),yellow:cube("yellow",[.95,.68,.05]),blue:cube("blue",[.04,.25,.75]),lamp:cube("lamp",[.16,.16,.16])
+};
+function box(mesh,x,y,z,s,rot=I()){draw(mesh,compose(tr(x,y,z),rot,sc(...s)))}
+
+function carParts(rootZ=0){
+ // body
+ box(meshes.red,0,.75,rootZ,[1.05,.35,2.15]);
+ box(meshes.red,0,1.08,rootZ-.15,[.88,.32,1.15]);
+ box(meshes.glass,0,1.15,rootZ-.15,[.75,.22,.78]);
+ box(meshes.dark,0,.60,rootZ+1.98,[1.08,.16,.12]);
+ // bumpers/lights
+ box(meshes.white,0,.60,rootZ-2.18,[1.08,.12,.10]);
+ box(meshes.yellow,-.72,.74,rootZ-2.27,[.18,.12,.06]);
+ box(meshes.yellow,.72,.74,rootZ-2.27,[.18,.12,.06]);
+ // wheels
+ for(let x of [-.95,.95])for(let z of [-1.45,1.45])wheel(x,.55,rootZ+z);
 }
-function car(x,z,color,s){ // forward is -Z; body, bonnet, roof, glass, wheels
- box([x,.68,z],[2.05,.55,4.0].map(v=>v*s),color);
- box([x,.99,z-1.0*s],[1.72,.18,1.2].map(v=>v*s),color.map(v=>Math.min(1,v+.08)));
- box([x,1.18*s,z+.15*s],[1.48,.65,1.75].map(v=>v*s),[.045,.09,.13]);
- box([x,.98*s,z-.05*s],[1.52,.1,1.55].map(v=>v*s),[.08,.17,.22]);
- // windshield / back glass accents
- box([x,1.19*s,z-.78*s],[1.42,.45,.08].map(v=>v*s),[.08,.16,.2]);
- box([x,1.19*s,z+1.02*s],[1.42,.43,.08].map(v=>v*s),[.08,.16,.2]);
- for(let side of [-1,1])for(let zz of [-1.25,1.25]){box([x+side*1.02*s,.38*s,z+zz*s],[.32,.62,.72].map(v=>v*s),[.025,.025,.028]);box([x+side*1.06*s,.4*s,z+zz*s],[.09,.34,.36].map(v=>v*s),[.12,.12,.12])}
- for(let side of [-1,1]){box([x+side*.78*s,.68*s,z-2.02*s],[.3,.2,.08].map(v=>v*s),[1,.83,.55]);box([x+side*.78*s,.65*s,z+2.02*s],[.3,.2,.08].map(v=>v*s),[.65,.02,.02])}
+function wheel(x,y,z){
+ box(meshes.dark,x,y,z,[.20,.28,.42],rz(Math.PI/2));
+ box(meshes.white,x,y,z,[.09,.13,.20],rz(Math.PI/2));
 }
-function frame(){requestAnimationFrame(frame)} // harmless fallback
-requestAnimationFrame(render);
+function cockpit(){
+ // dashboard, steering wheel and seats are positioned in front of driver
+ box(meshes.dark,0,1.15,-1.0,[1.0,.25,.18]);
+ box(meshes.dark,-.52,.98,-.72,[.28,.08,.28],rz(.05));
+ box(meshes.dark,.52,.98,-.72,[.28,.08,.28],rz(-.05));
+ // steering wheel ring approximated by 3 bars
+ box(meshes.dark,-.18,1.22,-.62,[.06,.06,.48],rz(.15));
+ box(meshes.dark,.18,1.22,-.62,[.06,.06,.48],rz(-.15));
+ box(meshes.dark,0,1.22,-.62,[.34,.06,.06]);
+ // hands
+ box(meshes.white,-.48,1.25,-.57,[.10,.07,.25],rz(.5));
+ box(meshes.white,.48,1.25,-.57,[.10,.07,.25],rz(-.5));
+ // gear lever
+ box(meshes.dark,.65,.85,-.65,[.07,.25,.07],rz(.15));box(meshes.white,.65,1.08,-.68,[.13,.10,.13]);
+}
+
+let P=persp(Math.PI/3,1,.1,300),camMode=0,night=0,lights=0;
+let carX=0,carZ=0,carYaw=0,speed=0,rpm=900,gear=1;
+let gas=false,brake=false,L=false,R=false,clutch=false;
+const traffic=[[-4,20,.8], [4,38,1.0],[-2,55,.75],[3,75,.9],[-5,95,.7]];
+function bind(id,on,off){let e=document.getElementById(id);e.addEventListener("pointerdown",ev=>{ev.preventDefault();on()});["pointerup","pointercancel","pointerleave"].forEach(x=>e.addEventListener(x,ev=>{ev.preventDefault();off()}))}
+bind("gas",()=>gas=true,()=>gas=false);bind("brake",()=>brake=true,()=>brake=false);bind("left",()=>L=true,()=>L=false);bind("right",()=>R=true,()=>R=false);bind("clutch",()=>clutch=true,()=>clutch=false);
+document.querySelectorAll(".gear").forEach(e=>e.onclick=()=>{gear=e.dataset.g==="R"?-1:+e.dataset.g;document.querySelectorAll(".gear").forEach(q=>q.classList.remove("active"));e.classList.add("active")});
+document.getElementById("camera").onclick=()=>camMode=(camMode+1)%3;
+document.getElementById("night").onclick=()=>night=night?0:1;
+document.getElementById("lights").onclick=()=>lights=lights?0:1;
+addEventListener("keydown",e=>{if(e.key==="ArrowUp")gas=true;if(e.key==="ArrowDown")brake=true;if(e.key==="ArrowLeft")L=true;if(e.key==="ArrowRight")R=true});
+addEventListener("keyup",e=>{if(e.key==="ArrowUp")gas=false;if(e.key==="ArrowDown")brake=false;if(e.key==="ArrowLeft")L=false;if(e.key==="ArrowRight")R=false});
+
+function world(){
+ // road
+ box(meshes.road,0,-.15,35,[7,.15,150]);
+ box(meshes.side,-10,-.16,35,[3,.12,150]);box(meshes.side,10,-.16,35,[3,.12,150]);
+ // lane markings
+ for(let z=-120;z<180;z+=8){box(meshes.white,0,.02,z,[.10,.025,2.0]);box(meshes.white,-3.5,.02,z,[.08,.025,1.4]);box(meshes.white,3.5,.02,z,[.08,.025,1.4])}
+ // buildings and trees
+ for(let i=-8;i<=8;i+=2){
+   let z=-80+i*17;
+   box(meshes.building,-13,2.5,z,[2.5,2.5,5]);box(meshes.building,13,2.5,z,[2.5,2.5,5]);
+   box(meshes.window,-13,2.7,z-5.05,[1.6,1.5,.08]);box(meshes.window,13,2.7,z-5.05,[1.6,1.5,.08]);
+   box(meshes.tree,-9,1.0,z+6,[.55,1.4,.55]);box(meshes.trunk,-9,.45,z+6,[.12,.45,.12]);
+   box(meshes.tree,9,1.0,z+6,[.55,1.4,.55]);box(meshes.trunk,9,.45,z+6,[.12,.45,.12]);
+ }
+ // traffic cars
+ for(let i=0;i<traffic.length;i++){
+   let t=traffic[i];let z=t[1]-carZ;let x=t[0];let s=t[2];
+   box(meshes.blue,x,.65,z,[.8,.3,1.4]);box(meshes.glass,x,1.0,z,[.62,.2,.7]);
+   for(let xx of [x-.72,x+.72])for(let zz of [z-.9,z+.9])box(meshes.dark,xx,.45,zz,[.15,.22,.28],rz(Math.PI/2));
+ }
+ // traffic lights
+ box(meshes.dark,-5,4,-22,[.15,4,.15]);box(meshes.yellow,-5,7.5,-22,[.55,.5,.25]);
+ box(meshes.dark,5,4,-22,[.15,4,.15]);box(meshes.yellow,5,7.5,-22,[.55,.5,.25]);
+}
+
+function render(){
+ let asp=canvas.width/canvas.height;P=persp(Math.PI/3,asp,.1,300);
+ gl.viewport(0,0,canvas.width,canvas.height);
+ gl.clearColor(night?.025:.42,night?.05:.65,night?.11:.82,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ gl.useProgram(prog);gl.uniformMatrix4fv(U.P,false,P);gl.uniform3f(U.light,lights?.8:0.7,1,0.5);gl.uniform1f(U.night,night);
+ world();
+ if(camMode===0){
+   let V=look([carX,.95,carZ-1.0],[carX,.95,carZ-12]);
+   gl.uniformMatrix4fv(U.V,false,V);
+   cockpit();
+ }else{
+   let ex=camMode===1?[carX+5,3.0,carZ+7]:[carX-7,2.8,carZ+3];
+   let tar=[carX,1.0,carZ];
+   gl.uniformMatrix4fv(U.V,false,look(ex,tar));
+ }
+ carParts(carZ);
+}
+function resize(){let d=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*d;canvas.height=innerHeight*d}
+addEventListener("resize",resize);resize();
+
+let last=performance.now(),running=false;
+function tick(t){
+ let dt=Math.min(.04,(t-last)/1000);last=t;
+ if(running){
+   let acc=gas?(gear<0?-28:48):0;
+   if(clutch)acc*=.35;
+   speed+=acc*dt;
+   if(brake)speed-=75*dt;
+   speed-=speed*.8*dt;
+   speed=Math.max(0,Math.min(150,speed));
+   let steer=(R?1:0)-(L?1:0);
+   carYaw+=steer*speed*.00055;
+   carX+=Math.sin(carYaw)*speed*dt*.13;
+   carZ+=Math.cos(carYaw)*speed*dt*.13;
+   carX=Math.max(-5.2,Math.min(5.2,carX));
+   rpm=900+speed*55+(gas?700:0);
+   document.getElementById("speed").textContent=Math.round(speed);
+   document.getElementById("rpm").textContent=Math.round(rpm);
+   document.getElementById("gearNow").textContent=gear<0?"R":gear;
+ }
+ render();requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+document.getElementById("start").onclick=async()=>{running=true;document.getElementById("start").style.display="none";try{await document.documentElement.requestFullscreen()}catch(e){}try{await screen.orientation.lock("landscape")}catch(e){}};
 })();
-</script></body></html>
+</script>
+</body>
+</html>
